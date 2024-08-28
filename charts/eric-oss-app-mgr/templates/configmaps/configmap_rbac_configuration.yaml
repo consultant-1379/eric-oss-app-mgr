@@ -1,0 +1,697 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "eric-oss-app-mgr.rbac-config.name" .  }}-route-configmap
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  rbac-configuration.json: |
+    {
+      "roles": [
+        {
+          "name": "AppMgrAdmin",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgrOperator",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgr_Application_Administrator",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgr_Application_Operator",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgr_App_Application_ReadOnly",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgr_AppInstance_Application_ReadOnly",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgr_AppOnboardingJob_Application_ReadOnly",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        },
+        {
+          "name": "AppMgr_LogViewer_Application_TroubleShooter",
+          "attributes": {},
+          "composites": {
+            "realm": [
+            ],
+            "client": {}
+          }
+        }
+      ],
+      "authorization": {
+        "resources": [
+          {
+            "name": "AppOnboarding Apps",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/onboarding/v1/v1/apps",
+                "/app-manager/onboarding/v1/v1/apps/*",
+              {{ end }}
+                "/app-manager/onboarding/v1/apps",
+                "/app-manager/onboarding/v1/apps/*"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              },
+              {
+                "name": "POST"
+              },
+              {
+                "name": "PUT"
+              }
+            ]
+          },
+          {
+            "name": "AppOnboarding Artifacts",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/onboarding/v1/v1/apps/*/artifacts",
+                "/app-manager/onboarding/v1/v1/apps/*/artifacts/*",
+                "/app-manager/onboarding/v1/v1/apps/*/artifacts/*/file",
+              {{ end }}
+                "/app-manager/onboarding/v1/apps/*/artifacts",
+                "/app-manager/onboarding/v1/apps/*/artifacts/*",
+                "/app-manager/onboarding/v1/apps/*/artifacts/*/file"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App Instances",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/lcm/v1/app-lcm/v1/app-instances",
+                "/app-manager/lcm/v1/app-lcm/v1/app-instances/*",
+              {{ end }}
+                "/app-manager/lcm/app-lcm/v1/app-instances",
+                "/app-manager/lcm/app-lcm/v1/app-instances/*"
+            ],
+            "scopes": [
+              {
+                "name": "PUT"
+              },
+              {
+                "name": "GET"
+              },
+              {
+                "name": "POST"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm Artifact Instances",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/lcm/v1/app-lcm/v1/app-instances/*/artifact-instances",
+                "/app-manager/lcm/v1/app-lcm/v1/app-instances/*/artifact-instances/*",
+              {{ end }}
+                "/app-manager/lcm/app-lcm/v1/app-instances/*/artifact-instances",
+                "/app-manager/lcm/app-lcm/v1/app-instances/*/artifact-instances/*"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App Delete",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/lcm/v1/app-lcm/v1/apps/*",
+              {{ end }}
+                "/app-manager/lcm/app-lcm/v1/apps/*"
+            ],
+            "scopes": [
+              {
+                "name": "DELETE"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App instance Delete",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/lcm/v1/app-lcm/v1/apps/*/app-instances",
+              {{ end }}
+                "/app-manager/lcm/app-lcm/v1/apps/*/app-instances"
+            ],
+            "scopes": [
+              {
+                "name": "DELETE"
+              }
+            ]
+          },
+          {
+            "name": "AppOnboarding Onboard app packages",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-onboarding/v2/v2/app-packages",
+            {{ end }}
+              "/app-onboarding/v2/app-packages"
+            ],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          },
+          {
+            "name": "AppOnboarding Onboarded Apps",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-onboarding/v2/v2/onboarding-jobs",
+              "/app-onboarding/v2/v2/onboarding-jobs*",
+              "/app-onboarding/v2/v2/onboarding-jobs/*",
+            {{ end }}
+              "/app-onboarding/v2/onboarding-jobs",
+              "/app-onboarding/v2/onboarding-jobs*",
+              "/app-onboarding/v2/onboarding-jobs/*"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              },
+              {
+                "name": "DELETE"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App Instances v2",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/lcm/v2/app-lcm/v2/app-instances",
+                "/app-manager/lcm/v2/app-lcm/v2/app-instances/*",
+              {{ end }}
+                "/app-manager/lcm/app-lcm/v2/app-instances",
+                "/app-manager/lcm/app-lcm/v2/app-instances/*"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm Artifact Instances v2",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+              {{ if .Values.sef.enabled }}
+                "/app-manager/lcm/v2/app-lcm/v2/app-instances/*/artifact-instances",
+                "/app-manager/lcm/v2/app-lcm/v2/app-instances/*/artifact-instances/*",
+              {{ end }}
+                "/app-manager/lcm/app-lcm/v2/app-instances/*/artifact-instances",
+                "/app-manager/lcm/app-lcm/v2/app-instances/*/artifact-instances/*"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm Apps",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-lifecycle-management/v3/v3/apps",
+              "/app-lifecycle-management/v3/v3/apps*",
+              "/app-lifecycle-management/v3/v3/apps/*",
+            {{ end }}
+              "/app-lifecycle-management/v3/apps",
+              "/app-lifecycle-management/v3/apps*",
+              "/app-lifecycle-management/v3/apps/*"
+            ],
+            "scopes": [
+              {
+                "name": "GET"
+              },
+              {
+                "name": "DELETE"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm Apps Mode Update",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-lifecycle-management/v3/v3/apps/*/mode",
+            {{ end }}
+              "/app-lifecycle-management/v3/apps/*/mode"
+            ],
+            "scopes": [
+                {
+                    "name": "PUT"
+                }
+            ]
+          },
+          {
+            "name": "AppLcm Apps Initialization Actions",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-lifecycle-management/v3/v3/apps/*/initialization-actions",
+            {{ end }}
+              "/app-lifecycle-management/v3/apps/*/initialization-actions"
+            ],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App-Instances",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-lifecycle-management/v3/v3/app-instances",
+              "/app-lifecycle-management/v3/v3/app-instances*",
+              "/app-lifecycle-management/v3/v3/app-instances/*",
+            {{ end }}
+              "/app-lifecycle-management/v3/app-instances",
+              "/app-lifecycle-management/v3/app-instances*",
+              "/app-lifecycle-management/v3/app-instances/*"
+            ],
+            "scopes": [
+              {
+                "name": "POST"
+              },
+              {
+                "name": "GET"
+              },
+              {
+                "name": "DELETE"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App-Instances Deployment Actions",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-lifecycle-management/v3/v3/app-instances/*/deployment-actions",
+            {{ end }}
+              "/app-lifecycle-management/v3/app-instances/*/deployment-actions"
+            ],
+            "scopes": [
+              {
+                "name": "POST"
+              }
+            ]
+          },
+          {
+            "name": "AppLcm App-Instances Update",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [
+            {{ if .Values.sef.enabled }}
+              "/app-lifecycle-management/v3/v3/app-instances/*/component-instances",
+            {{ end }}
+              "/app-lifecycle-management/v3/app-instances/*/component-instances"
+            ],
+            "scopes": [
+              {
+                "name": "PUT"
+              }
+            ]
+          }
+        ],
+        "policies": [
+          {
+            "name": "Is AppMgrAdmin Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgrAdmin\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrOperator Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgrOperator\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrApplicationAdminstrator Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgr_Application_Administrator\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrApplicationOperator Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgr_Application_Operator\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrAppApplicationReadOnly Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgr_App_Application_ReadOnly\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrAppInstanceApplicationReadOnly Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgr_AppInstance_Application_ReadOnly\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrAppOnboardingJobApplicationReadOnly Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgr_AppOnboardingJob_Application_ReadOnly\",\"required\":false}]"
+            }
+          },{
+            "name": "Is AppMgrLogViewerApplicationTroubleShooter Policy",
+            "type": "role",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+                "roles": "[{\"id\":\"AppMgr_LogViewer_Application_TroubleShooter\",\"required\":false}]"
+            }
+          },{
+            "name": "AppMgr onboard Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppOnboarding Apps\"]",
+              "scopes": "[\"POST\", \"DELETE\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\"]"
+            }
+          },{
+            "name": "AppMgr enable Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppOnboarding Apps\"]",
+              "scopes": "[\"PUT\", \"GET\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\", \"Is AppMgrOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr onboard View Artifacts Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppOnboarding Artifacts\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\", \"Is AppMgrOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr instantiateLCM Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App Instances\"]",
+              "scopes": "[\"POST\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\"]"
+            }
+          },{
+            "name": "AppMgr instantiateLCM View and terminate Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App Instances\"]",
+              "scopes": "[\"GET\", \"PUT\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\", \"Is AppMgrOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM Artifact View Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm Artifact Instances\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\", \"Is AppMgrOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App Delete Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App Delete\"]",
+              "scopes": "[\"DELETE\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App instance Delete Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App instance Delete\"]",
+              "scopes": "[\"DELETE\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\"]"
+            }
+          },{
+            "name": "AppMgr Onboarding onboard app Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppOnboarding Onboard app packages\"]",
+              "scopes": "[\"POST\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          },{
+            "name": "AppMgr Onboarding view app Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppOnboarding Onboarded Apps\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\", \"Is AppMgrApplicationOperator Policy\", \"Is AppMgrAppOnboardingJobApplicationReadOnly Policy\"]"
+            }
+          },{
+            "name": "AppMgr Onboarding delete app Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppOnboarding Onboarded Apps\"]",
+              "scopes": "[\"DELETE\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM Apps View Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm Apps\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\", \"Is AppMgrApplicationOperator Policy\", \"Is AppMgrAppApplicationReadOnly Policy\"]"
+            }
+          },{
+            "name": "AppMgr app instance view Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App Instances v2\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\", \"Is AppMgrOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr artifact instance view Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm Artifact Instances v2\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrAdmin Policy\", \"Is AppMgrOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM Apps Delete Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm Apps\"]",
+              "scopes": "[\"DELETE\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM Apps Mode Update Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm Apps Mode Update\"]",
+              "scopes": "[\"PUT\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\", \"Is AppMgrApplicationOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM Apps Initialization Actions Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm Apps Initialization Actions\"]",
+              "scopes": "[\"POST\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App-Instances Create Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App-Instances\"]",
+              "scopes": "[\"POST\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App-Instances View Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App-Instances\"]",
+              "scopes": "[\"GET\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\", \"Is AppMgrApplicationOperator Policy\", \"Is AppMgrAppInstanceApplicationReadOnly Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App-Instances Update Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App-Instances Update\"]",
+              "scopes": "[\"PUT\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\", \"Is AppMgrApplicationOperator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App-Instances Delete Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App-Instances\"]",
+              "scopes": "[\"DELETE\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          },{
+            "name": "AppMgr LCM App-Instances Deployment Actions Permission",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE",
+            "config": {
+              "resources": "[\"AppLcm App-Instances Deployment Actions\"]",
+              "scopes": "[\"POST\"]",
+              "applyPolicies": "[\"Is AppMgrApplicationAdminstrator Policy\"]"
+            }
+          }
+        ],
+        "scopes": [
+          {
+            "name": "GET"
+          },
+          {
+            "name": "POST"
+          },
+          {
+            "name": "PUT"
+          },
+          {
+            "name": "DELETE"
+          }
+        ]
+      }
+    }

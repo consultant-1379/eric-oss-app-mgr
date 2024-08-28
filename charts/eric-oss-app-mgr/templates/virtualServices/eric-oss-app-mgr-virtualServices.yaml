@@ -1,0 +1,81 @@
+#
+# COPYRIGHT Ericsson 2023
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+{{ $serviceMesh := include "eric-oss-app-mgr.service-mesh.enabled" . | trim -}}
+{{- $serviceMeshIngress := include "eric-oss-app-mgr.service-mesh-ingress.enabled" . | trim -}}
+{{- if and (eq $serviceMesh "true") (eq $serviceMeshIngress "true") -}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+  name: {{ template "eric-oss-app-mgr.name" . }}-cr-virtual-service
+spec:
+  exportTo:
+  - "."
+  gateways:
+    - {{ template "eric-oss-app-mgr.name" . }}-gateway
+  hosts:
+    - {{ required "A valid .Values.global.hosts.appmgr entry required" .Values.global.hosts.appmgr }}
+  http:
+  - name: appmgr-reg
+    match:
+    - uri:
+        prefix: /v2
+    route:
+    - destination:
+        host: eric-lcm-container-registry-registry
+        port:
+          number: 5000
+  - name: appmgr-reg-metrics
+    match:
+    - uri:
+        prefix: /metrics
+    route:
+    - destination:
+        host: eric-lcm-container-registry-registry
+        port:
+          number: 5001
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+  name: {{ template "eric-oss-app-mgr.name" . }}-virtual-service
+spec:
+  exportTo:
+  - "."
+  gateways:
+    - {{ template "eric-oss-app-mgr.name" . }}-gateway
+  hosts:
+    - {{ required "A valid .Values.global.hosts.appmgr entry required" .Values.global.hosts.appmgr }}
+  http:
+  - match:
+    - uri:
+        prefix: /
+    name: appmgr
+    retries:
+      attempts: {{ index .Values "eric-oss-app-mgr-api-gateway" "virtualService-config" "retries" }}
+    route:
+    - destination:
+        host: eric-eo-api-gateway
+        port:
+          number: 80
+{{ end }}

@@ -1,0 +1,51 @@
+#
+# COPYRIGHT Ericsson 2022
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+{{ if .Values.global.networkPolicy.enabled -}}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ template "eric-oss-app-mgr.name" . }}-app-onboarding-pg-policy
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: eric-oss-app-onboarding-pg
+  policyTypes:
+  - Ingress
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eric-oss-app-onboarding
+        - podSelector:
+            matchLabels:
+              jobTag: onboarding-jobs
+        - podSelector:
+            matchLabels:
+              app: eric-oss-app-onboarding-pg-bragent
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eric-ctrl-bro
+      ports:
+      - port: 5432
+        protocol: TCP
+      - port: 9187
+        protocol: TCP
+{{- end -}}

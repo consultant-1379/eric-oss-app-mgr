@@ -1,0 +1,1 @@
+{{- include "eric-oss-app-mgr.role-binding" (list $ . "eric-appmgr-data-document-db-dispatch-psp-binding" "eric-appmgr-data-document-db-dispatch") -}}

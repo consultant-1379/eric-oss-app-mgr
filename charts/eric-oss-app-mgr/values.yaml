@@ -1,0 +1,608 @@
+#
+# COPYRIGHT Ericsson 2021
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+
+# Default values for eric-oss-app-mgr.
+global:
+  networkPolicy:
+    enabled: true
+  registry:
+    url: armdocker.rnd.ericsson.se
+    imagePullPolicy: IfNotPresent
+  pullSecret: "k8s-registry-secret"
+  hosts:
+    appmgr: ""
+    iam: ""
+    gas: ""
+    eic: ""
+  security:
+    policyBinding:
+      create: true
+    tls:
+      enabled: false
+    mTls2Iam:
+      enabled: true
+  support:
+    ipv6:
+      enabled: false
+  timezone: UTC
+  # Configuring global streamingMethod: indirect, direct, dual. default=direct
+  log:
+    outputs: ["stdout", "stream"]
+    streamingMethod: "direct"
+  logShipper:
+    deployment:
+      type: "sidecar"
+  eric-oss-app-lcm-stub:
+    enabled: false
+  eric-oss-app-onboarding-stub:
+    enabled: false
+  kafkaBootstrap: eric-oss-dmm-kf-op-sz-kafka-bootstrap:9092
+  kafkaBootstrapTls: eric-oss-dmm-kf-op-sz-kafka-bootstrap:9093
+  kafkaClusterName: eric-oss-dmm-kf-op-sz
+  iam:
+    adminSecret: eric-sec-access-mgmt-creds
+    clientId: eo
+    internal:
+      adminClientCertSecret: eric-cnbase-oss-config-iam-admin-client-cert-secret
+      adminClientName: eric-cnbase-oss-config-iam-admin-client
+      hostname: eric-sec-access-mgmt-http
+    passwordKey: kcpasswd
+    tlsSecret: iam-tls-secret
+    userKey: kcadminid
+    cacert:
+      secretName: iam-cacert-secret
+      key: tls.crt
+      filePath: iam/ca.crt
+
+
+labels: {}
+
+tags:
+  so: false
+  pf: false
+  uds: false
+  platform: false
+
+## Name used to override the service name
+nameOverride: ""
+
+tls: # this tls is used for SM ingress tls configuration
+  enabled: true
+  secretName: app-mgr-tls-secret
+
+ingress: # this section is used for ICCR ingress
+  enabled: false
+  # Mandatory: the ingress hostname to be provided site specific
+  hostname: ""
+  tls:
+    enabled: true
+    passthrough: false
+    secretName: app-mgr-tls-secret
+  ingressClass: ""
+  annotations: ""
+
+imageCredentials: {}
+
+timeout: &defaultTimeout 1200000
+
+keyCloak:
+  iam:
+    cacert:
+      secretName: iam-cacert-secret
+      key: tls.crt
+      filePath: iam/ca.crt
+
+    clientId: eo
+    adminSecret: eric-sec-access-mgmt-creds
+    userKey: kcadminid
+    passwordKey: kcpasswd
+
+  imageCredentials:
+    keycloakClient:
+      registry:
+        url: armdocker.rnd.ericsson.se
+        pullPolicy: IfNotPresent
+      repoPath: proj-orchestration-so
+
+  images:
+    keycloakClient:
+      name: keycloak-client
+      tag: 1.8.0-1
+
+api-gateway-route:
+  # client needs to be moved to product-info.yaml
+  client:
+    repoPath: proj-eric-oss-drop
+    image: eric-api-gateway-client
+    tag: 1.0.60-1
+    pullPolicy: IfNotPresent
+    imagePullSecrets: "k8s-registry-secret"
+
+  credentials:
+    name: eric-oss-system-user-secret
+    user-key: system-user
+    pwd-key: system-user-pwd
+
+  eric-oss-app-lcm:
+    route-path:
+      service-name: http://eric-oss-app-lcm:8080
+      path: /app-manager/lcm/**
+      new-path: /app-manager/lcm/**
+      route-id: rapp-manager-lcm
+      tag: -i
+      app-lifecycle-management:
+        route-id: app-lifecycle-management
+        path: /app-lifecycle-management/**
+
+  eric-oss-app-onboarding:
+    route-path:
+      service-name: http://eric-oss-app-onboarding:8080
+      path: /app-manager/onboarding/**
+      new-path: /app-manager/onboarding/**
+      route-id: rapp-manager-onboarding
+      tag: -i
+      app-onboarding:
+        route-id: app-onboarding
+        path: /app-onboarding/**
+
+  eric-lcm-helm-chart-registry:
+    route-path:
+      service-name: http://eric-lcm-helm-chart-registry:8080
+      path: /app-manager/helm/**
+      new-path: /app-manager/helm/**
+      route-id: rapp-manager-helm-registry
+      tag: -i
+
+  eric-lcm-container-registry:
+    route-path:
+      service-name: http://eric-lcm-container-registry:5000
+      path: /app-manager/registry/**
+      new-path: /app-manager/registry/**
+      route-id: rapp-manager-container-registry
+      tag: -i
+
+serviceAccount:
+  name: ""
+
+cnom-dashboards:
+  enabled: true
+
+eric-lcm-helm-executor:
+  enabled: true
+  container-registry:
+    url: ""
+    credentials:
+      kubernetesSecretName: "eric-oss-app-mgr-container-registry-secret"
+      keyForUserId: "name"
+      keyForUserPw: "password"
+  postgress:
+    service: "eric-appmgr-data-document-db"
+    dbName: "lcm-pg-db"
+    credentials:
+      dbLCMUsername: "customuser"
+      kubernetesSecretName: "eric-appmgr-data-document-db-credentials"
+      keyForUserId: "custom-user"
+      keyForUserPw: "custom-pwd"
+      keyForSuperPw: "super-pwd"
+  helm-registry:
+    username: "admin"
+    password: "pass"
+  ingress:
+    enabled: false
+  ccr:
+    enabled: false
+  kafka:
+    enabled: false
+    host: ""
+    port: ""
+    source: ""
+
+eric-appmgr-data-document-db:
+  name: eric-appmgr-data-document-db
+  enabled: true
+  postgresDatabase: "lcm-pg-db"
+  credentials:
+    kubernetesSecretName: "eric-appmgr-data-document-db-credentials"
+    keyForUserId: "custom-user"
+    keyForUserPw: "custom-pwd"
+    keyForSuperPw: "super-pwd"
+    keyForMetricsPw: "metrics-pwd"
+    keyForReplicaId: "replica-user"
+    keyForReplicaPw: "replica-pwd"
+  highAvailability:
+    synchronousModeEnabled: true
+    replicaCount: 2
+  brAgent:
+    enabled: true
+    logLevel: "info"
+    RootLogLevel: "info"
+    PGAgentLogLevel: "info"
+    logicalDBBackupEnable: false
+    backupTypeList:
+      - "DEFAULT"
+      - "PLATFORM"
+    brLabelValue: eric-appmgr-data-document-db
+  postgresConfig:
+    idle_in_transaction_session_timeout: 300000
+    max_connections: 500
+    shared_buffers: 512MB
+
+eric-oss-app-lcm:
+  autoScaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 3
+  virtualService-config:
+    timeout:
+      post: 60s
+      put: 30s
+      delete: 50s
+      others: 45s
+    retries:
+      post: 0
+      put: 0
+      delete: 0
+      others: 2
+    perTryTimeout:
+      others: 15s
+  destinationRule-config:
+    connectionPool:
+      http1MaxPendingRequests: 1000
+      http2MaxRequests: 1000
+      maxRequestsPerConnection: 100
+      maxConnections: 50
+    outlierDetection:
+      baseEjectionTime: 1m
+      consecutive5xxErrors: 3
+      interval: 10s
+      maxEjectionPercent: 10
+  config:
+    acmTimeout: *defaultTimeout
+
+eric-oss-app-onboarding:
+  replicaCount: 2
+  virtualService-config:
+    timeout:
+      post: 1m
+      others: 40s
+    retries:
+      post: 0
+      others: 2
+    perTryTimeout:
+      others: 40s
+  destinationRule-config:
+    connectionPool:
+      http1MaxPendingRequests: 1000
+      http2MaxRequests: 1000
+      maxRequestsPerConnection: 100
+      maxConnections: 50
+    outlierDetection:
+      baseEjectionTime: 1m
+      consecutive5xxErrors: 3
+      interval: 10s
+      maxEjectionPercent: 10
+
+eric-oss-app-mgr-api-gateway:
+  virtualService-config:
+    retries: 0
+
+eric-oss-app-lcm-data:
+  enabled: true
+  highAvailability:
+    synchronousModeEnabled: true
+    replicaCount: 1
+
+eric-lcm-helm-chart-registry:
+  enabled: true
+  env:
+    secret:
+      BASIC_AUTH_USER: "admin"
+      BASIC_AUTH_PASS: "pass"
+    s3:
+      enabled: true
+    s3Secret: eric-data-object-storage-mn-secret
+  ingress:
+    enabled: false
+    generateSelfSignedCerts: false
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  brAgent:
+    enabled: true
+    backupTypeList:
+      - "DEFAULT"
+      - "PLATFORM"
+  replicaCount: 2
+  podDisruptionBudget:
+    minAvailable: 50%
+  migration:
+    enabled: false
+
+eric-lcm-container-registry:
+  enabled: true
+  registry:
+    users:
+      secret: "eric-oss-app-mgr-container-registry-secret"
+      name: "dockeruser"
+      password: "dockerpassword"
+    storage:
+      migration:
+        enabled: false
+      s3:
+        enabled: true
+        authSecret: eric-data-object-storage-mn-secret
+  ingress:
+    enabled: false
+    hostname: "app-mgr-host-name"
+    generateSelfSignedCerts: false
+    useHttpProxy: false
+    tls:
+      secretName: app-mgr-tls-secret
+  replicaCount: 2
+  podDisruptionBudget:
+    minAvailable: 50%
+  brAgent:
+    enabled: true
+    backupTypeList:
+      - "DEFAULT"
+      - "PLATFORM"
+  resources:
+    registry:
+      limits:
+        ephemeral-storage: 500Mi
+    brAgent:
+      limits:
+        ephemeral-storage: 75Gi
+        memory: 2560Mi
+
+eric-oss-acm-runtime:
+  resources:
+    eric-oss-acm-runtime:
+      requests:
+        memory: "1Gi"
+        cpu: "1.5"
+      limits:
+        memory: "1Gi"
+        cpu: "1.5"
+  enabled: true
+  createDefaultRoles: true
+  autoScaling:
+    enabled: false
+  db:
+    user: postgres
+    credsExternalSecret: eric-oss-app-mgr-acm-runtime-db-secret
+    rootExternalSecret: eric-oss-app-mgr-acm-runtime-db-secret
+    service:
+      internalPort: 5432
+      name: eric-appmgr-data-document-db
+  kafkaConfig:
+    localKafkaCluster: false
+    useStrimziKafka: true
+    issuerReference: eric-oss-dmm-kf-op-sz-clients-ca-cert
+  customNaming:
+    toscaElementName: org.onap.policy.clamp.acm.AutomationCompositionElement
+    toscaCompositionName: org.onap.policy.clamp.acm.AutomationComposition
+  timeout: *defaultTimeout
+
+tolerations: []
+terminationGracePeriodSeconds: 30
+
+eric-oss-am-cnlcm-adapter:
+  enabled: true
+  resources:
+    eric-oss-am-cnlcm-adapter:
+      requests:
+        memory: "1Gi"
+        cpu: "200m"
+      limits:
+        memory: "4Gi"
+        cpu: "1"
+
+appManagementAPIs:
+  - serviceCapabilityId: appmgr-onboarding-service    #should be unique can be named as per the service name. (mandatory)
+    status: active
+    apiPrefix: app-manager                   #                                        (optional)
+    apiName: onboarding                      # This parameter also should be unique    (mandatory)
+    apiVersion: v1                           # Version (mandatory)
+    apiCategory: /APIGM/category/api         # This is used to filter all the apis by category level (mandatory)(/APIGM/category-->this should not be changed)
+    apiDefinition:
+      - operationName: appmgr-onboarding-service/GET
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: GET
+      - operationName: appmgr-onboarding-service/POST
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: POST
+      - operationName: appmgr-onboarding-service/PUT
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: PUT
+      - operationName: appmgr-onboarding-service/PATCH
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: PATCH
+      - operationName: appmgr-onboarding-service/DELETE
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: DELETE
+    throttlingThreshold: 410                     # ratelimit value (mandatory)
+    endpoints:
+      - endpointId: appmgr-onboarding-service-endpoint  # endpoint id should be unique (mandatory)
+        endpointUrl: eric-oss-app-onboarding:8080        # Downstream service  (mandatory)
+        endpointTlsUrl: eric-oss-app-onboarding:8080
+        httpResponseTimeout: 60000
+    interceptor:
+      - extractTokenInterceptor
+      - requestPartyTokenInterceptor
+    accessControl:
+      authentication:
+        scheme: auto                          # authentication type (mandatory) (2 options--> auto (with aa),none (without aa) )
+  - serviceCapabilityId: appmgr-lcm-service    #should be unique can be named as per the service name. (mandatory)
+    status: active
+    apiPrefix: app-manager                   #                                        (optional)
+    apiName: lcm                             # This parameter also should be unique    (mandatory)
+    apiVersion: v1                           # Version (mandatory)
+    apiCategory: /APIGM/category/api         # This is used to filter all the apis by category level (mandatory)(/APIGM/category-->this should not be changed)
+    apiDefinition:
+      - operationName: appmgr-lcm-service/GET
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: GET
+      - operationName: appmgr-lcm-service/POST
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: POST
+      - operationName: appmgr-lcm-service/PUT
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: PUT
+      - operationName: appmgr-lcm-service/PATCH
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: PATCH
+      - operationName: appmgr-lcm-service/DELETE
+        urlPattern: (.*)    # url of the service (mandatory)
+        urlPatternType: uriRegex                    # type of URL (mandatory) (uriRegex,uriTemplate are 2 options)
+        method: DELETE
+    throttlingThreshold: 410                          # ratelimit value (mandatory)
+    endpoints:
+      - endpointId: appmgr-lcm-service-endpoint     # endpoint id should be unique (mandatory)
+        endpointUrl: eric-oss-app-lcm:8080           # Downstream service  (mandatory)
+        endpointTlsUrl: eric-oss-app-lcm:8080
+        httpResponseTimeout: 60000
+    interceptor:
+      - extractTokenInterceptor
+      - requestPartyTokenInterceptor
+    accessControl:
+      authentication:
+        scheme: auto                          # authentication type (mandatory) (2 options--> auto (with aa),none (without aa) )
+  - serviceCapabilityId: app-onboarding-service
+    status: active
+    apiPrefix: ""
+    apiName: app-onboarding
+    apiVersion: v2
+    apiCategory: /APIGM/category/api
+    apiDefinition:
+      - operationName: app-onboarding-service/GET
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: GET
+      - operationName: app-onboarding-service/POST
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: POST
+      - operationName: app-onboarding-service/PUT
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: PUT
+      - operationName: app-onboarding-service/PATCH
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: PATCH
+      - operationName: app-onboarding-service/DELETE
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: DELETE
+    throttlingThreshold: 410
+    endpoints:
+      - endpointId: app-onboarding-service-endpoint
+        endpointUrl: eric-oss-app-onboarding:8080
+        endpointTlsUrl: eric-oss-app-onboarding:8080
+        httpResponseTimeout: 60000
+    interceptor:
+      - extractTokenInterceptor
+      - requestPartyTokenInterceptor
+    accessControl:
+      authentication:
+        scheme: auto
+  - serviceCapabilityId: app-lifecycle-management-service
+    status: active
+    apiPrefix: ""
+    apiName: app-lifecycle-management
+    apiVersion: v3
+    apiCategory: /APIGM/category/api
+    apiDefinition:
+      - operationName: app-lifecycle-management-service/GET
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: GET
+      - operationName: app-lifecycle-management-service/POST
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: POST
+      - operationName: app-lifecycle-management-service/PUT
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: PUT
+      - operationName: app-lifecycle-management-service/PATCH
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: PATCH
+      - operationName: app-lifecycle-management-service/DELETE
+        urlPattern: (.*)
+        urlPatternType: uriRegex
+        method: DELETE
+    throttlingThreshold: 410
+    endpoints:
+      - endpointId: app-lifecycle-management-service-endpoint
+        endpointUrl: eric-oss-app-lcm:8080
+        endpointTlsUrl: eric-oss-app-lcm:8080
+        httpResponseTimeout: 60000
+    interceptor:
+      - extractTokenInterceptor
+      - requestPartyTokenInterceptor
+    accessControl:
+      authentication:
+        scheme: auto
+
+serviceMesh:
+  enabled: true # sef-gateway-client requires service level service mesh but by default it is made as false and when sef tag is enabled  this will be enabled
+
+sef:
+  enabled: false  # This tag is added so that it is used by every file which was added as part of SEF migration.
+
+resources:
+  exposure-api-manager-client:
+    limits:
+      cpu: "300m"
+      memory: "300Mi"
+      ephemeral-storage: "100Mi"
+    requests:
+      cpu: "100m"
+      memory: "50Mi"
+      ephemeral-storage: "50Mi"
+    jvm:
+      initialMemoryAllocationPercentage: 50
+      smallMemoryAllocationMaxPercentage: 50
+      largeMemoryAllocationMaxPercentage: 70
+  logshipper:
+    requests:
+      memory: 50Mi
+      cpu: 250m
+      ephemeral-storage: 50Mi
+    limits:
+      memory: 50Mi
+      cpu: 500m
+      ephemeral-storage: 100Mi
+
+eric-eo-api-gateway:
+  enabled: true
+
+logShipper:
+  storage:
+    size: 1Gi
+    path: /tmp

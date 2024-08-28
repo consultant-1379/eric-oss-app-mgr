@@ -1,0 +1,1 @@
+{{- include "eric-oss-app-mgr.role-binding" (list $ . "eric-oss-kf-sz-op-appmgr-kafka-cluster-operator-psp-binding" "eric-oss-kf-sz-op-appmgr-kafka-cluster-operator") -}}

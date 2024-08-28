@@ -1,0 +1,16 @@
+global:
+  registry:
+    url:
+  hosts:
+    iam: dummy
+    appmgr: dummy
+
+gas:
+  defaultUser:
+    username: dummy
+    password: dummy
+
+eric-ctrl-bro:
+  sftp:
+    username: dummy
+    password: dummy

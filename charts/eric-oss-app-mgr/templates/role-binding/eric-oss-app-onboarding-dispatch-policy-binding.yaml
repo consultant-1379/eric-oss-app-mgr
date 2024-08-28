@@ -1,0 +1,1 @@
+{{- include "eric-oss-app-mgr.role-binding" (list $ . "eric-oss-app-onboarding-dispatch-psp-binding" "eric-oss-app-onboarding-pg-dispatch") -}}

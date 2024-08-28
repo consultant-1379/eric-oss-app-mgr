@@ -1,0 +1,101 @@
+#
+# COPYRIGHT Ericsson 2024
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: app-management
+  title: App Management
+  annotations:
+    backstage.io/source-location: url:https://gerrit.ericsson.se/plugins/gitiles/OSS/com.ericsson.oss.ae/eric-oss-app-mgr
+    backstage.io/kubernetes-label-selector: 'app.kubernetes.io/name=eric-oss-app-mgr'
+    gerrit/component: OSS/com.ericsson.oss.ae/eric-oss-app-mgr
+    jenkins:
+      fem8s11-eiffel052.eiffel.gic.ericsson.se:8443/OSS-Integration-Common-Testing
+  links:
+    - url: https://eteamspace.internal.ericsson.com/display/IDUN/Team+Ghost
+      title: Team Ghost Confluence
+      icon: dashboard
+  roles:
+    l2-design-owner: esunbal
+    product-owner: ekmauhr
+    application-architect: epagrac
+  approval:
+    date: 12-03-24
+    approver: epagrac
+spec:
+  domain: automation-enablement
+  owner: team-ghost
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: eric-appmgr-data-document-db
+  title: App Manager Common DB
+  description: 'PG Database for App Manager'
+  tags:
+    - ericsson-intelligent-controller
+  # approval:
+  #   date: 01-05-2024
+  #   approver: <signum>
+spec:
+  lifecycle: production
+  owner: team-ghost
+  system: app-management
+  type: database
+  dependsOn:
+    - component:eric-data-document-database-pg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: eric-lcm-helm-chart-registry
+  title: APP LCM Helm Chart Registry
+  description: 'Helm Chart Registry for App LCM'
+  tags:
+    - ericsson-intelligent-controller
+  # approval:
+  #   date: 01-05-2024
+  #   approver: <signum>
+spec:
+  lifecycle: production
+  owner: team-ghost
+  system: app-management
+  type: microservice
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: eric-lcm-container-registry
+  title: App LCM Container Registry
+  description: 'Container Registry for App LCM'
+  links:
+    - url: https://adp.ericsson.se/marketplace/container-registry
+      title: ADP Marketplace
+      icon: dashboard
+  tags:
+    - ericsson-intelligent-controller
+  # approval:
+  #   date: 01-05-2024
+  #   approver: <signum>
+spec:
+  lifecycle: production
+  owner: team-ghost
+  system: app-management
+  type: microservice

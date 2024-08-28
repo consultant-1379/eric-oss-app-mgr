@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-oss-app-mgr.gateway-client-container-registry.name" . }}-route-configmap
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  route.json: |
+    {
+        "id": "{{ index .Values "api-gateway-route" "eric-lcm-container-registry" "route-path" "route-id" }}",
+        "predicates": [
+            {
+                "name": "Path",
+                "args": {
+                    "_genkey_0": "{{ index .Values "api-gateway-route" "eric-lcm-container-registry" "route-path" "path" }}"
+                }
+            },
+            {
+                "name": "Host",
+                "args": {
+                    "_genkey_0": "{{ index .Values "global" "hosts" "appmgr" }}"
+                }
+            }
+        ],
+ 
+        "filters": [
+        {
+            "name": "StripPrefix",
+            "args": {
+                "_genkey_0": "2"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Map-Name",
+                "_genkey_1": "lcm-container-registry-rate-limiter"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Max-Access",
+                "_genkey_1": "410"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Reset-Time",
+                "_genkey_1": "1"
+            }
+        },
+        {
+            "name": "RateLimitFilter",
+            "args": {}
+        },
+        {
+            "name": "AddTokenHeaderFilter",
+            "args": {}
+        }
+    ],
+        "uri": "{{ index .Values "api-gateway-route" "eric-lcm-container-registry" "route-path" "service-name" }}",
+        "order": 0
+    }

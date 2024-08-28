@@ -1,0 +1,11 @@
+global:
+  hosts:
+    iam: ""
+    appmgr: ""
+  registry:
+    url: ""
+  support:
+    ipv6:
+      enabled: false
+  timezone: UTC
+  createClusterRoles: true

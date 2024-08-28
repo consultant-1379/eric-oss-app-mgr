@@ -1,0 +1,15 @@
+global:
+  hosts:
+   iam: dummy
+   appmgr: dummy
+  registry:
+    url: dummy
+  timezone: dummy
+
+eric-sec-access-mgmt:
+    ingress:
+        hostname: dummy
+gas:
+    defaultUser:
+        username: dummy
+        password: dummy

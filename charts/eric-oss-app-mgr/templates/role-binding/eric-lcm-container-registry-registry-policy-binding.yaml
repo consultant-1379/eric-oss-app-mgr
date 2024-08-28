@@ -1,0 +1,1 @@
+{{- include "eric-oss-app-mgr.role-binding" (list $ . "eric-lcm-container-registry-registry-psp-binding" "eric-lcm-container-registry-registry") -}}

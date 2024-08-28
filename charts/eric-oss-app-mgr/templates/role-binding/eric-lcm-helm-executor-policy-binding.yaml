@@ -1,0 +1,1 @@
+{{- include "eric-oss-app-mgr.role-binding" (list $ . "eric-lcm-helm-executor-psp-binding" "eric-lcm-helm-executor") -}}

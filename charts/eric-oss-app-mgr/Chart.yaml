@@ -1,0 +1,50 @@
+apiVersion: v2
+dependencies:
+- name: eric-lcm-helm-executor
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm-local
+  version: 0.30.0-1
+- name: eric-oss-app-lcm
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm-local
+  version: 1.86.0-1
+- name: eric-oss-app-onboarding
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm-local
+  version: 1.93.0-1
+- alias: eric-appmgr-data-document-db
+  name: eric-data-document-database-pg
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-gs-all-helm/
+  version: 9.3.0+30
+- name: eric-lcm-container-registry
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-gs-all-helm/
+  version: 8.2.0+18
+- name: eric-lcm-helm-chart-registry
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-gs-all-helm/
+  version: 7.3.0+3
+- alias: eric-log-shipper-appmgr
+  condition: eric-log-shipper.enabled
+  import-values:
+  - child: logShipper.config
+    parent: global.logShipper.config
+  name: eric-log-shipper
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-gs-all-helm
+  version: 19.5.0+8
+- condition: eric-oss-acm-runtime.enabled
+  name: eric-oss-acm-runtime
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-est-onap-drop-helm
+  version: 3.3.0+12
+- condition: eric-oss-am-cnlcm-adapter.enabled
+  name: eric-oss-am-cnlcm-adapter
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-drop-helm-local
+  version: 1.234.0-1
+- condition: eric-sef-exposure-api-manager-client.enabled
+  import-values:
+  - child: exposureApiManagerClient.config
+    parent: global.exposureApiManagerClient.config
+  name: eric-sef-exposure-api-manager-client
+  repository: https://arm.sero.gic.ericsson.se/artifactory/proj-adp-eric-sef-exposure-api-manager-released-helm/
+  version: 3.6.0+153
+description: Chart containing OSS Application Manager Microservices
+maintainers:
+- email: PDLTEAMGHO@pdl.internal.ericsson.com
+  name: Team Ghost
+name: eric-oss-app-mgr
+version: 1.695.0

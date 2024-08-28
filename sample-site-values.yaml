@@ -1,0 +1,16 @@
+global:
+  hosts:
+    appmgr: "appmgr.ericsson.se"
+  registry:
+    url: "armdocker.rnd.ericsson.se"
+  support:
+    ipv6:
+      enabled: false
+  timezone: UTC
+  createClusterRoles: true
+sef:
+  enabled: true
+serviceMesh:
+  enabled: true
+eric-eo-api-gateway:
+  enabled: true

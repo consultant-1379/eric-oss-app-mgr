@@ -1,0 +1,52 @@
+#
+# COPYRIGHT Ericsson 2022
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+{{ $serviceMesh := include "eric-oss-app-mgr.service-mesh.enabled" . | trim -}}
+{{- $serviceMeshIngress := include "eric-oss-app-mgr.service-mesh-ingress.enabled" . | trim -}}
+{{- if and (eq $serviceMesh "true") (eq $serviceMeshIngress "true") -}}
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+  name: {{ template "eric-oss-app-mgr.name" . }}-gateway
+spec:
+  selector:
+    app: service-mesh-ingress-gateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+      - "./{{ required "A valid .Values.global.hosts.appmgr entry required" .Values.global.hosts.appmgr }}"
+    {{- if .Values.tls.enabled }}
+    tls:
+      httpsRedirect: true # sends 301 redirect for http requests
+    {{- end }}
+  {{- if .Values.tls.enabled }}
+  - port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    hosts:
+      - "./{{ required "A valid .Values.global.hosts.appmgr entry required" .Values.global.hosts.appmgr }}"
+    tls:
+      mode: SIMPLE # enables HTTPS on this port
+      credentialName: {{ required "A valid .Values.tls.secretName entry required" .Values.tls.secretName }}
+  {{- end }}
+{{ end }}

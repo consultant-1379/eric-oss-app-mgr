@@ -1,0 +1,7 @@
+{{- define "eric-oss-app-mgr.labels" }}
+{{- include "eric-oss-app-mgr.kubernetes-io-info" . }}
+app: {{ template "eric-oss-app-mgr.name" . }}
+chart: {{ template "eric-oss-app-mgr.chart" . }}
+release: {{ .Release.Name | quote }}
+heritage: {{ .Release.Service | quote }}
+{{- end}}

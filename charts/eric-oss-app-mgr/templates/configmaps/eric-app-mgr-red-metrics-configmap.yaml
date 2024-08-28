@@ -1,0 +1,218 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-oss-app-mgr.name" . }}-red-metrics
+  labels:
+    {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+    {{- include "eric-oss-app-mgr.cnom-dashboards" .| nindent 4 }}
+  annotations:
+    {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  app_mgr_red_metrics.json: |
+    {
+        "namespace": "APP_MGR_SERVICE",
+        "dashboards": [
+            {
+                "_id": "app_manager_red",
+                "title": "RED Metrics for App Manager",
+                "apps": ["statusOverview"],
+                "dashboardTreeView": {
+                  "tree": [["APP Manager", "RED Metrics"]]
+                },
+                "tiles": [
+                    {
+                        "xSize": 5,
+                        "widget": "request_rate_ps"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "error_rate_ps"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "avg_response_latency_ps"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "longest_reponse_latency_ps"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "response_time_50_centile"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "response_time_75_centile"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "response_time_90_centile"
+                    },
+                    {
+                        "xSize": 5,
+                        "widget": "response_time_100_centile"
+                    },
+                    {
+                        "xSize": 10,
+                        "ySize": 3,
+                        "variables":
+                            {
+                             "podListFilterRegex": "eric-oss-app-onboarding|eric-oss-app-lcm|eric-lcm-helm-chart-registry|eric-lcm-helm-executor|eric-lcm-container-registry|eric-oss-am-cnlcm-adapter|eric-oss-acm-runtime"
+                            },
+                        "widget": "builtin:pod_table_no_resource_usage"
+                    }
+                ]
+            }
+        ],
+        "widgets": [
+            {
+                "_id": "request_rate_ps",
+                "widgetType": "timeline",
+                "title": "Requests per second",
+                "sources": [{ "source": "request_rate_ps" }]
+            },
+            {
+                "_id": "error_rate_ps",
+                "widgetType": "timeline",
+                "title": "Errors per second",
+                "sources": [{ "source": "error_rate_ps" }]
+            },
+            {
+                "_id": "avg_response_latency_ps",
+                "widgetType": "timeline",
+                "title": "Average response latency per second",
+                "sources": [{ "source": "avg_response_latency_ps" }]
+            },
+            {
+                "_id": "longest_reponse_latency_ps",
+                "widgetType": "timeline",
+                "title": "Max response latency per second",
+                "sources": [{ "source": "longest_reponse_latency_ps" }]
+            },
+            {
+                "_id": "response_time_50_centile",
+                "widgetType": "timeline",
+                "title": "Response time for 50% of the requests",
+                "sources": [{ "source": "response_time_50_centile" }]
+            },
+            {
+                "_id": "response_time_75_centile",
+                "widgetType": "timeline",
+                "title": "Response time for 75% of the requests",
+                "sources": [{ "source": "response_time_75_centile" }]
+            },
+            {
+                "_id": "response_time_90_centile",
+                "widgetType": "timeline",
+                "title": "Response time for 90% of the requests",
+                "sources": [{ "source": "response_time_90_centile" }]
+            },
+            {
+                "_id": "response_time_100_centile",
+                "widgetType": "timeline",
+                "title": "Response time for 100% of the requests",
+                "sources": [{ "source": "response_time_100_centile" }]
+            }
+        ],
+        "sources": [
+    {{ if .Values.global.security.tls.enabled }}
+            {
+                "_id": "request_rate_ps",
+                "sourceType": "prometheus",
+                "query": "sum(http_server_requests_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "error_rate_ps",
+                "sourceType": "prometheus",
+                "query": "sum(http_server_requests_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+', status!~'2..'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "avg_response_latency_ps",
+                "sourceType": "prometheus",
+                "query": "sum(http_server_requests_seconds_sum{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+', status!~'500'}) by (pod_name) / sum(http_server_requests_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+', status!~'500'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "longest_reponse_latency_ps",
+                "sourceType": "prometheus",
+                "query": "max(http_server_requests_seconds_max{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+', status!~'5..'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "response_time_50_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+'}[5m])) by (le,pod_name))",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "response_time_75_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(0.75, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+'}[5m])) by (le,pod_name))",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "response_time_90_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(0.90, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+'}[5m])) by (le,pod_name))",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "response_time_100_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(1, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', uri!~'/actuator/.+'}[5m])) by (le,pod_name))",
+                "splitByLabelName": "pod_name"
+            }
+    {{ else }}
+            {
+                "_id": "request_rate_ps",
+                "sourceType": "prometheus",
+                "query": "sum(http_server_requests_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "error_rate_ps",
+                "sourceType": "prometheus",
+                "query": "sum(http_server_requests_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes', uri!~'/actuator/.+', status!~'2..'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "avg_response_latency_ps",
+                "sourceType": "prometheus",
+                "query": "sum(http_server_requests_seconds_sum{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+', status!~'500'}) by (kubernetes_pod_name) / sum(http_server_requests_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+', status!~'500'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "longest_reponse_latency_ps",
+                "sourceType": "prometheus",
+                "query": "max(http_server_requests_seconds_max{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+', status!~'5..'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "response_time_50_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+'}[5m])) by (le,kubernetes_pod_name))",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "response_time_75_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(0.75, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+'}[5m])) by (le,kubernetes_pod_name))",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "response_time_90_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(0.90, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', uri!~'/actuator/.+'}[5m])) by (le,kubernetes_pod_name))",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "response_time_100_centile",
+                "sourceType": "prometheus",
+                "query": "histogram_quantile(1, sum(rate(http_server_requests_seconds_bucket{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes', uri!~'/actuator/.+'}[5m])) by (le,kubernetes_pod_name))",
+                "splitByLabelName": "kubernetes_pod_name"
+            }
+    {{ end }}
+        ]
+    }

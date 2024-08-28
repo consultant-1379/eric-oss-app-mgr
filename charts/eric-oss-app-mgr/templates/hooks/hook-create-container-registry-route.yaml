@@ -1,0 +1,78 @@
+#
+# COPYRIGHT Ericsson 2021
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+{{ if index .Values "eric-eo-api-gateway" "enabled" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "eric-oss-app-mgr.gateway-client-container-registry.name" . }}-create-route-hook
+  annotations:
+    "helm.sh/hook": post-install, post-upgrade, post-rollback
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+spec:
+  activeDeadlineSeconds: 1800
+  backoffLimit: 1800
+  template:
+    spec:
+      serviceAccountName: {{ template "eric-oss-app-mgr.name" . }}-sa
+      imagePullSecrets:
+        - name: {{ include "eric-oss-app-mgr.pullSecrets" . }}
+      restartPolicy: Never
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: api-gateway-client
+          image: {{ index .Values "global" "registry" "url" }}/{{ index .Values "api-gateway-route" "client" "repoPath" }}/{{ index .Values "api-gateway-route" "client" "image" }}:{{ index .Values "api-gateway-route" "client" "tag" }}
+          imagePullPolicy: {{ index .Values "global" "registry" "imagePullPolicy" }}
+          env:
+            - name: SYSTEM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ index .Values "api-gateway-route" "credentials" "name" }}
+                  key: {{ index .Values "api-gateway-route" "credentials" "user-key" }}
+            - name: SYSTEM_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ index .Values "api-gateway-route" "credentials" "name" }}
+                  key: {{ index .Values "api-gateway-route" "credentials" "pwd-key" }}
+          args:
+          - "{{ index .Values "api-gateway-route" "eric-lcm-container-registry" "route-path" "tag" }}"
+          {{- if include "eric-oss-app-mgr.ingress-tls-enabled" . }}
+          - "https://{{ index .Values "global" "hosts" "appmgr" }}"
+          {{- else }}
+          - "http://{{ index .Values "global" "hosts" "appmgr" }}"
+          {{- end }}
+          - "$(SYSTEM_USER)"
+          - "$(SYSTEM_USER_PASSWORD)"
+          - "upgrade"
+          - "/config/route.json"
+          volumeMounts:
+            - name: {{ template "eric-oss-app-mgr.gateway-client-container-registry.name" . }}-route-conf-vol
+              mountPath: /config
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 7373585
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: {{ template "eric-oss-app-mgr.gateway-client-container-registry.name" . }}-route-conf-vol
+          configMap:
+            name: {{ template "eric-oss-app-mgr.gateway-client-container-registry.name" . }}-route-configmap
+            defaultMode: 0777
+{{- end -}}

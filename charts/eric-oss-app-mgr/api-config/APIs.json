@@ -1,0 +1,131 @@
+{{- $tlsenabled := .Values.global.security.tls.enabled }}
+{
+    {{- range  $index, $service := .Values.appManagementAPIs}}
+
+    {{$service.serviceCapabilityId |  quote}}: [
+        {
+
+          "apiVersion": "v3",
+          "kind": "API",
+          "data": {
+            "serviceCapabilityId": {{ $service.serviceCapabilityId | quote }},
+            "status": {{ $service.status | quote }},
+            "apiPrefix": {{ $service.apiPrefix | quote }},
+            "apiName": {{ $service.apiName | quote }},
+            "apiVersion": {{ $service.apiVersion | quote }},
+            "apiCategory": {{ $service.apiCategory | quote }},
+            "apiDefinition": [
+              {{- range $apicount, $serviceApiDefinition := $service.apiDefinition}}
+              {
+                "operationName": "#/paths/{{$serviceApiDefinition.operationName}}",
+                "urlPattern": {{ $serviceApiDefinition.urlPattern | quote }},
+                "urlPatternType": {{ $serviceApiDefinition.urlPatternType | quote }},
+                "methods": [{{ $serviceApiDefinition.method | quote }}]
+              }
+              {{- if ne $apicount (sub (len $service.apiDefinition) 1 ) }}
+              ,{{- end }}
+              {{- end }}
+            ],
+            "accessControl": {
+              "authentication": {
+                "scheme": {{ $service.accessControl.authentication.scheme | quote }}
+              }
+
+            },
+            "serviceLevelAgreement": {
+              "throttlingRate": {
+                "threshold": {{ $service.throttlingThreshold }}
+              }
+            }
+          }
+        },
+        {{- range $serviceEndpoint := $service.endpoints}}
+        {
+          "apiVersion": "v3",
+          "kind": "Endpoint",
+          "data": {
+            "endpointId": {{ $serviceEndpoint.endpointId| quote }},
+            {{- if $tlsenabled }}
+            "serverUrl": "http://{{ $serviceEndpoint.endpointTlsUrl }}",
+            {{- else }}
+            "serverUrl": "http://{{ $serviceEndpoint.endpointUrl }}",
+            {{- end }}
+            "connection": {
+              "httpProtocol": "HTTP1.1",
+              "enableH2CPriorKnowledge": false,
+              "httpResponseTimeout": {{ $serviceEndpoint.httpResponseTimeout }}
+            }
+          }
+        },
+      {{- end}}
+
+        {
+          "apiVersion": "v3",
+          "kind": "BindingPlugin",
+          "metadata": {
+            "phaseName": "auth"
+          },
+          "data": [
+            {{- range $intcount, $interceptor := $service.interceptor}}
+            {
+              "name": {{ $interceptor | quote}}
+            }
+            {{- if ne $intcount (sub (len $service.interceptor) 1 ) }}
+            ,{{- end}}
+            {{- end }}
+          ]
+        },
+      {{- $foundExtra := false }}
+      {{- $foundRequest := false }}
+      {{- range $intcount, $interceptor := $service.interceptor }}
+      {{- if eq $interceptor "extractTokenInterceptor" }}
+        {
+          "apiVersion": "v3",
+          "kind": "PluginConfiguration",
+          "metadata": {
+            "pluginName": "extractTokenInterceptor"
+          },
+          "data": {
+            "configuration": {
+              {{- range $interceptor := $service.interceptor }}
+              {{- if eq $interceptor "extractTokenInterceptor" }}
+              {{- $foundExtra = true }}
+              {{- end }}
+              {{- if eq $interceptor "requestPartyTokenInterceptor" }}
+              {{- $foundRequest = true }}
+              {{- end }}
+              {{- end }}
+              {{- if and $foundExtra $foundRequest }}
+              "tokenHeaderName": "Authorization",
+              {{- end }}
+              "enableTokenPropagation": true,
+              "tokenCookieFieldNames": ["eric.adp.authz.proxy.token"]
+            }
+          }
+        }
+        {{- if ne $intcount (sub (len $service.interceptor) 1 ) }}
+        ,{{- end }}
+        {{- end }}
+        {{- if eq $interceptor "requestPartyTokenInterceptor" }}
+        {
+          "apiVersion": "v3",
+          "kind": "PluginConfiguration",
+          "metadata": {
+            "pluginName": "requestPartyTokenInterceptor"
+          },
+          "data": {
+            "configuration": {
+              "defaultResourceServer": "eo"
+            }
+          }
+        }
+        {{- if ne $intcount (sub (len $service.interceptor) 1 ) }}
+        ,{{- end }}
+        {{- end }}
+        {{- end }}
+
+    ]
+    {{- if ne $index (sub (len $.Values.appManagementAPIs) 1 ) }}
+    ,{{- end }}
+{{- end }}
+}

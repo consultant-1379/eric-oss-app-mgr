@@ -1,0 +1,429 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-oss-app-mgr.name" . }}-use-metrics
+  labels:
+    {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+    {{- include "eric-oss-app-mgr.cnom-dashboards" .| nindent 4 }}
+  annotations:
+    {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  app_mgr_use_metrics.json: |
+    {
+        "namespace": "APP_MGR_SERVICE",
+        "dashboards": [
+            {
+                "_id": "app_manager_use",
+                "title": "USE Metrics for App Manager",
+                "apps": ["statusOverview"],
+                "dashboardTreeView": {
+                  "tree": [["APP Manager", "USE Metrics"]]
+                },
+                "tiles": [
+                    {
+                        "xSize": 3,
+                        "widget": "heap_memory_committed"
+                    },
+                    {
+                        "xSize": 4,
+                        "widget": "heap_memory_used"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "heap_memory_max"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "gc_number_of_times"
+                    },
+                    {
+                        "xSize": 4,
+                        "widget": "gc_pause_duration_taken"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "gc_pause_duration_max"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "non_heap_memory_committed"
+                    },
+                    {
+                        "xSize": 4,
+                        "widget": "non_heap_memory_used"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "non_heap_memory_max"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "system_cpu_usage"
+                    },
+                    {
+                        "xSize": 4,
+                        "widget": "process_cpu_usage"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "avg_cpu_usage"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "load_average"
+                    },
+                    {
+                        "xSize": 4,
+                        "widget": "live_thread_states"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "open_file_descriptors"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "load_cpu_usage"
+                    },
+                    {
+                        "xSize": 4,
+                        "widget": "peak_thread_states"
+                    },
+                    {
+                        "xSize": 3,
+                        "widget": "log_events"
+                    }
+                ]
+            }
+        ],
+        "widgets": [
+            {
+                "_id": "heap_memory_committed",
+                "widgetType": "timeline",
+                "title": "Heap Memory Committed",
+                "sources": [{ "source": "heap_memory_committed" }]
+            },
+            {
+                "_id": "heap_memory_used",
+                "widgetType": "timeline",
+                "title": "Heap Memory Used",
+                "sources": [{ "source": "heap_memory_used" }]
+            },
+            {
+                "_id": "heap_memory_max",
+                "widgetType": "timeline",
+                "title": "Heap Memory Max",
+                "sources": [{ "source": "heap_memory_max" }]
+            },
+            {
+                "_id": "gc_number_of_times",
+                "widgetType": "timeline",
+                "title": "Number of Garbabe Collections",
+                "sources": [{ "source": "gc_number_of_times"}]
+            },
+            {
+                "_id": "gc_pause_duration_taken",
+                "widgetType": "timeline",
+                "title": "Time Taken for Garbage Collections",
+                "sources": [{ "source": "gc_pause_duration_taken"}]
+            },
+            {
+                "_id": "gc_pause_duration_max",
+                "widgetType": "timeline",
+                "title": "Garbage Collection Max Time Taken",
+                "sources": [{ "source": "gc_pause_duration_max"}]
+            },
+            {
+                "_id": "non_heap_memory_committed",
+                "widgetType": "timeline",
+                "title": "Non-Heap Memory Committed",
+                "sources": [{ "source": "non_heap_memory_committed" }]
+            },
+            {
+                "_id": "non_heap_memory_used",
+                "widgetType": "timeline",
+                "title": "Non-Heap Memory Used",
+                "sources": [{ "source": "non_heap_memory_used" }]
+            },
+            {
+                "_id": "non_heap_memory_max",
+                "widgetType": "timeline",
+                "title": "Non-Heap Memory Max",
+                "sources": [{ "source": "non_heap_memory_max" }]
+            },
+            {
+                "_id": "system_cpu_usage",
+                "widgetType": "timeline",
+                "title": "System CPU Usage",
+                "sources": [{ "source": "system_cpu_usage"}]
+            },
+            {
+                "_id": "process_cpu_usage",
+                "widgetType": "timeline",
+                "title": "Process CPU Usage",
+                "sources": [{ "source": "process_cpu_usage"}]
+            },
+            {
+                "_id": "avg_cpu_usage",
+                "widgetType": "timeline",
+                "title": "AVG CPU Usage",
+                "sources": [{ "source": "avg_cpu_usage"}]
+            },
+            {
+                "_id": "load_average",
+                "widgetType": "timeline",
+                "title": "Load Average",
+                "sources": [{ "source": "load_average"}]
+            },
+            {
+                "_id": "live_thread_states",
+                "widgetType": "timeline",
+                "title": "Live Thread States",
+                "sources": [{ "source": "live_thread_states"}]
+            },
+            {
+                "_id": "open_file_descriptors",
+                "widgetType": "timeline",
+                "title": "Open File Descriptors",
+                "sources": [{ "source": "open_file_descriptors"}]
+            },
+            {
+                "_id": "load_cpu_usage",
+                "widgetType": "timeline",
+                "title": "Load CPU Usage",
+                "sources": [{ "source": "load_cpu_usage"}]
+            },
+            {
+                "_id": "peak_thread_states",
+                "widgetType": "timeline",
+                "title": "Peak Thread States",
+                "sources": [{ "source": "peak_thread_states"}]
+            },
+            {
+                "_id": "log_events",
+                "widgetType": "timeline",
+                "title": "Log Events",
+                "sources": [{ "source": "log_events"}]
+            }
+        ],
+        "sources": [
+    {{ if .Values.global.security.tls.enabled }}
+            {
+                "_id": "heap_memory_committed",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_committed_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', area='heap'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "heap_memory_used",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_used_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', area='heap'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "heap_memory_max",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_max_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', area='heap'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "gc_number_of_times",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_gc_pause_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "gc_pause_duration_taken",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_gc_pause_seconds_sum{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name) / sum(jvm_gc_pause_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "gc_pause_duration_max",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_gc_pause_seconds_max{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "non_heap_memory_committed",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_committed_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', area='nonheap'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "non_heap_memory_used",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_used_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', area='nonheap'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "non_heap_memory_max",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_max_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext', area='nonheap'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "system_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(system_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "process_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(process_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "avg_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(avg_over_time(process_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}[1h])) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "load_average",
+                "sourceType": "prometheus",
+                "query": "sum(system_load_average_1m{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "live_thread_states",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_threads_live_threads{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "open_file_descriptors",
+                "sourceType": "prometheus",
+                "query": "sum(process_files_open_files{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "load_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(system_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "peak_thread_states",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_threads_peak_threads{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            },
+            {
+                "_id": "log_events",
+                "sourceType": "prometheus",
+                "query": "sum(logback_events_total{app_kubernetes_io_instance='eric-oss-app-mgr', job=~'kubernetes-pods-istio-secure|kubernetes-pods-cleartext'}) by (pod_name)",
+                "splitByLabelName": "pod_name"
+            }
+    {{ else }}
+            {
+                "_id": "heap_memory_committed",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_committed_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', area='heap'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "heap_memory_used",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_used_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', area='heap'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "heap_memory_max",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_max_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', area='heap'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "gc_number_of_times",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_gc_pause_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "gc_pause_duration_taken",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_gc_pause_seconds_sum{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name) / sum(jvm_gc_pause_seconds_count{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "gc_pause_duration_max",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_gc_pause_seconds_max{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "non_heap_memory_committed",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_committed_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', area='nonheap'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "non_heap_memory_used",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_used_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', area='nonheap'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "non_heap_memory_max",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_memory_max_bytes{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods', area='nonheap'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "system_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(system_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "process_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(process_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "avg_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(avg_over_time(process_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}[1h])) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "load_average",
+                "sourceType": "prometheus",
+                "query": "sum(system_load_average_1m{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "live_thread_states",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_threads_live_threads{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "open_file_descriptors",
+                "sourceType": "prometheus",
+                "query": "sum(process_files_open_files{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "load_cpu_usage",
+                "sourceType": "prometheus",
+                "query": "sum(system_cpu_usage{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "peak_thread_states",
+                "sourceType": "prometheus",
+                "query": "sum(jvm_threads_peak_threads{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            },
+            {
+                "_id": "log_events",
+                "sourceType": "prometheus",
+                "query": "sum(logback_events_total{app_kubernetes_io_instance='eric-oss-app-mgr', job='kubernetes-pods'}) by (kubernetes_pod_name)",
+                "splitByLabelName": "kubernetes_pod_name"
+            }
+    {{ end }}
+        ]
+    }

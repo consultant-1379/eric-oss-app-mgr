@@ -1,0 +1,80 @@
+#
+# COPYRIGHT Ericsson 2024
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+{{ if index .Values "sef" "enabled" }}
+{{- $serviceMesh := include "eric-oss-app-mgr.service-mesh.enabled" . | trim -}}
+{{- if eq $serviceMesh "true" -}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+  name: {{ template "eric-oss-app-mgr.name" . }}-hub-addition-virtualservice
+spec:
+  exportTo:
+  - "."
+  gateways:
+  - eric-oss-common-base-common-gateway
+  hosts:
+  - {{ required "A valid .Values.global.hosts.eic entry required" .Values.global.hosts.eic }}
+  http:
+  - match:
+    - uri:
+        prefix: /app-manager/onboarding
+    rewrite:
+      uri: /hub/app-manager/onboarding/v1
+    route:
+    - destination:
+        host: eric-sef-exposure-api-gateway
+        port:
+          number: 8080
+    timeout: 60s
+  - match:
+    - uri:
+        prefix: /app-manager/lcm
+    rewrite:
+      uri: /hub/app-manager/lcm/v1
+    route:
+    - destination:
+        host: eric-sef-exposure-api-gateway
+        port:
+          number: 8080
+    timeout: 60s
+  - match:
+      - uri:
+          prefix: /app-onboarding
+    rewrite:
+      uri: /hub/app-onboarding/v2
+    route:
+      - destination:
+          host: eric-sef-exposure-api-gateway
+          port:
+            number: 8080
+    timeout: 60s
+  - match:
+      - uri:
+          prefix: /app-lifecycle-management
+    rewrite:
+      uri: /hub/app-lifecycle-management/v3
+    route:
+      - destination:
+          host: eric-sef-exposure-api-gateway
+          port:
+            number: 8080
+    timeout: 60s
+{{- end -}}
+{{ end }}

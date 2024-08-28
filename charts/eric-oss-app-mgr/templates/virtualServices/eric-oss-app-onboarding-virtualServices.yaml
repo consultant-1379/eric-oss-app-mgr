@@ -1,0 +1,56 @@
+#
+# COPYRIGHT Ericsson 2023
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+{{ $serviceMesh := include "eric-oss-app-mgr.service-mesh.enabled" . | trim -}}
+{{- $serviceMeshIngress := include "eric-oss-app-mgr.service-mesh-ingress.enabled" . | trim -}}
+{{- if and (eq $serviceMesh "true") (eq $serviceMeshIngress "true") -}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+  name: {{ template "eric-oss-app-mgr.name" . }}-app-onboarding-virtual-service
+spec:
+  exportTo:
+  - "."
+  hosts:
+    - eric-oss-app-onboarding
+  http:
+  - match:
+    - method:
+        exact: POST
+    name: onboarding-post-request
+    retries:
+      attempts: {{ index .Values "eric-oss-app-onboarding" "virtualService-config" "retries" "post" }}
+    route:
+    - destination:
+        host: eric-oss-app-onboarding
+        port:
+          number: 8080
+    timeout: {{ index .Values "eric-oss-app-onboarding" "virtualService-config" "timeout" "post" }}
+  - name: onboarding-get-delete-put
+    retries:
+      attempts: {{ index .Values "eric-oss-app-onboarding" "virtualService-config" "retries" "others" }}
+      perTryTimeout: {{ index .Values "eric-oss-app-onboarding" "virtualService-config" "perTryTimeout" "others" }}
+      retryOn: "503,504"
+    route:
+    - destination:
+        host: eric-oss-app-onboarding
+        port:
+          number: 8080
+    timeout: {{ index .Values "eric-oss-app-onboarding" "virtualService-config" "timeout" "others" }}
+{{ end }}

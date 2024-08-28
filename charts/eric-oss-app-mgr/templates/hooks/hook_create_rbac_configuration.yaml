@@ -1,0 +1,117 @@
+{{- $iamClientCredentialGrantAuthNEnabled := include "eric-oss-app-mgr.iam-client-credential-authn.enabled" . | trim -}}
+#
+# COPYRIGHT Ericsson 2024
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "eric-oss-app-mgr.rbac-config.name" . }}-create-rbac-hook
+  annotations:
+    "helm.sh/hook": post-install, post-upgrade, post-rollback
+    "helm.sh/hook-weight": "12"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+spec:
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+      {{- if (eq $iamClientCredentialGrantAuthNEnabled "true") }}
+        eric-sec-access-mgmt-access: "true"
+      {{- end }}
+    spec:
+      serviceAccountName: {{ template "eric-oss-app-mgr.name" . }}-sa
+      imagePullSecrets:
+        - name: {{ include "eric-oss-app-mgr.pullSecrets" . }}
+      restartPolicy: Never
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      containers:
+        - name: keycloak-client
+          image: {{ template "eric-oss-app-mgr.keycloak-client.registryUrl" . }}
+          imagePullPolicy: {{ index .Values "global" "registry" "imagePullPolicy" }}
+          securityContext:
+            runAsUser: 128474
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          env:
+          {{- if (eq $iamClientCredentialGrantAuthNEnabled "true") }}
+            - name: IAM_CLIENT_CREDENTIAL_GRANT_AUTHN_ENABLED
+              value: "true"
+          {{- else }}
+            - name: IAM_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.iam.adminSecret | quote }}
+                  key: {{ .Values.global.iam.userKey | quote }}
+            - name: IAM_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.iam.adminSecret | quote }}
+                  key: {{ .Values.global.iam.passwordKey | quote }}
+          {{- end }}
+          args:
+            - "create"
+            - "authz"
+            {{- if (eq $iamClientCredentialGrantAuthNEnabled "true") }}
+            - "--keycloak_internal_hostname={{ .Values.global.iam.internal.hostname }}"
+            - "--keycloak_admin_client_name={{ .Values.global.iam.internal.adminClientName }}"
+            - "--ca_cert_path=/run/secrets/{{ template "eric-oss-app-mgr.sip-tls-trusted-internal-root-ca-secret" . }}/ca.crt"
+            - "--client_cert_path=/run/secrets/{{ .Values.global.iam.internal.adminClientCertSecret }}/tls.crt"
+            - "--client_key_path=/run/secrets/{{ .Values.global.iam.internal.adminClientCertSecret }}/tls.key"
+            {{- else }}
+            - "--keycloak_hostname={{ .Values.global.hosts.iam }}"
+            - "--keycloak_user=$(IAM_ADMIN_USER)"
+            - "--keycloak_password=$(IAM_ADMIN_PASSWORD)"
+          {{- end }}
+            - "--client_name={{ .Values.global.iam.clientId }}"
+            - "--provider={{ .Chart.Name }}"
+            - "--config=/config/rbac-configuration.json"
+          volumeMounts:
+            - name: create-rbac-configuration-volume
+              mountPath: /config
+            {{- if (eq $iamClientCredentialGrantAuthNEnabled "true") }}
+            - name: siptls-rootcacert-volume
+              mountPath: /run/secrets/{{ template "eric-oss-app-mgr.sip-tls-trusted-internal-root-ca-secret" . }}
+            - name: client-cert-volume
+              mountPath: /run/secrets/{{ .Values.global.iam.internal.adminClientCertSecret }}
+            {{- else }}
+            - name: create-cacert-volume
+              mountPath: /mnt/certs
+            {{- end }}
+      volumes:
+        - name: create-rbac-configuration-volume
+          configMap:
+            name: {{ template "eric-oss-app-mgr.rbac-config.name" .  }}-route-configmap
+            defaultMode: 0777
+        {{- if (eq $iamClientCredentialGrantAuthNEnabled "true") }}
+        - name: siptls-rootcacert-volume
+          secret:
+            secretName: {{ template "eric-oss-app-mgr.sip-tls-trusted-internal-root-ca-secret" . }}
+        - name: client-cert-volume
+          secret:
+            secretName: {{ .Values.global.iam.internal.adminClientCertSecret | quote }}
+        {{- else }}
+        - name: create-cacert-volume
+          secret:
+            secretName: {{ .Values.global.iam.cacert.secretName }}
+            items:
+              - key: {{ .Values.global.iam.cacert.key }}
+                path: {{ .Values.global.iam.cacert.filePath }}
+        {{- end }}

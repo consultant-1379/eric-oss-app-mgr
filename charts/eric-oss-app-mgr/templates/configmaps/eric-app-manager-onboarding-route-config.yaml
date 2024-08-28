@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-oss-app-mgr.gateway-client-onboarding.name" . }}-route-configmap
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  route.json: |
+    {
+        "id": "{{ index .Values "api-gateway-route" "eric-oss-app-onboarding" "route-path" "route-id" }}",
+        "predicates": [
+            {
+                "name": "Path",
+                "args": {
+                    "_genkey_0": "{{ index .Values "api-gateway-route" "eric-oss-app-onboarding" "route-path" "path" }}"
+                }
+            },
+            {
+                "name": "Host",
+                "args": {
+                    "_genkey_0": "{{ index .Values "global" "hosts" "appmgr" }}",
+                    "_genkey_1": "{{ index .Values "global" "hosts" "gas" }}"
+                }
+            }
+        ],
+ 
+        "filters": [
+        {
+            "name": "StripPrefix",
+            "args": {
+                "_genkey_0": "2"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Map-Name",
+                "_genkey_1": "app-onboarding-rate-limiter"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Max-Access",
+                "_genkey_1": "410"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Reset-Time",
+                "_genkey_1": "1"
+            }
+        },
+        {
+            "name": "RateLimitFilter",
+            "args": {}
+        },
+        {
+            "name": "AddTokenHeaderFilter",
+            "args": {}
+        }
+    ],
+        "uri": "{{ index .Values "api-gateway-route" "eric-oss-app-onboarding" "route-path" "service-name" }}",
+        "order": 0
+    }

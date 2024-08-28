@@ -1,0 +1,39 @@
+#
+# COPYRIGHT Ericsson 2022
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+productName: "OSS APP MGR"
+productNumber: "CXC 101 0000"
+images:
+  api-gateway-client:
+    productName: "Api-Gateway Service"
+    productNumber: "CXC 201 2331"
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: proj-eric-oss-drop
+    name: "eric-api-gateway-client"
+    tag: 1.0.60-1
+  keycloakClient:
+    productName: "Keycloak Client Image"
+    productNumber: ""
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: "proj-orchestration-so"
+    name: "keycloak-client"
+    tag: "1.8.0-1"
+  exposureApiManagerClient:
+    productName: "Exposure Api Manager Client"
+    productNumber: "CXU 101 1786"
+    registry: "armdocker.rnd.ericsson.se"
+    repoPath: "proj-adp-rs-sef-released"
+    name: "eric-sef-exposure-api-manager-client"
+    tag: "3.6.0-153"

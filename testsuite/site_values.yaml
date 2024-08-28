@@ -1,0 +1,48 @@
+#
+# COPYRIGHT Ericsson 2024
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+global:
+  registry:
+    url: armdocker.rnd.ericsson.se
+  pullSecret: "k8s-registry-secret"
+  hosts:
+    appmgr: "appmgr.dummy.ericsson.com"
+    iam: "iam.dummy.ericsson.com"
+    eic: "eic.dummy.ericsson.com"
+  security:
+    tls:
+      enabled: true
+    privilegedPolicyClusterRoleName: "eric-app-ns-allowed-use-privileged-policy"
+  serviceMesh:
+    enabled: true
+    ingress:
+      enabled: true
+  support:
+    ipv6:
+      enabled: false
+  timezone: UTC
+  nodeSelector:
+    keyOne: valueOne
+tags:
+  so: true
+  pf: true
+  uds: true
+  platform: true
+sef:
+  enabled: true
+serviceMesh:
+  enabled: true
+eric-eo-api-gateway:
+  enabled: true

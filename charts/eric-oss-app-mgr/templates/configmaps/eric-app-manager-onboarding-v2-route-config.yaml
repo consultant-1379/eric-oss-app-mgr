@@ -1,0 +1,83 @@
+#
+# COPYRIGHT Ericsson 2024
+#
+#
+#
+# The copyright to the computer program(s) herein is the property of
+#
+# Ericsson Inc. The programs may be used and/or copied only with written
+#
+# permission from Ericsson Inc. or in accordance with the terms and
+#
+# conditions stipulated in the agreement/contract under which the
+#
+# program(s) have been supplied.
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "eric-oss-app-mgr.gateway-client-onboarding-v2.name" . }}-route-configmap
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  route.json: |
+    {
+        "id": "{{ index .Values "api-gateway-route" "eric-oss-app-onboarding" "route-path" "app-onboarding" "route-id" }}",
+        "predicates": [
+            {
+                "name": "Path",
+                "args": {
+                    "_genkey_0": "{{ index .Values "api-gateway-route" "eric-oss-app-onboarding" "route-path" "app-onboarding" "path" }}"
+                }
+            },
+            {
+                "name": "Host",
+                "args": {
+                    "_genkey_0": "{{ index .Values "global" "hosts" "appmgr" }}",
+                    "_genkey_1": "{{ index .Values "global" "hosts" "gas" }}"
+                }
+            }
+        ],
+    
+        "filters": [
+        {
+            "name": "StripPrefix",
+            "args": {
+                "_genkey_0": "1"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Map-Name",
+                "_genkey_1": "app-onboarding-rate-limiter"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Max-Access",
+                "_genkey_1": "410"
+            }
+        },
+        {
+            "name": "AddRequestHeader",
+            "args": {
+                "_genkey_0": "X-RateLimit-Reset-Time",
+                "_genkey_1": "1"
+            }
+        },
+        {
+            "name": "RateLimitFilter",
+            "args": {}
+        },
+        {
+            "name": "AddTokenHeaderFilter",
+            "args": {}
+        }
+    ],
+        "uri": "{{ index .Values "api-gateway-route" "eric-oss-app-onboarding" "route-path" "service-name" }}",
+        "order": 0
+    }

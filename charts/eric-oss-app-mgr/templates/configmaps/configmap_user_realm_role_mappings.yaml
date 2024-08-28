@@ -1,0 +1,18 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "eric-oss-app-mgr.user-realm.name" . }}-role-mappings-configmap
+  labels:
+  {{- include "eric-oss-app-mgr.kubernetes-io-info" .| nindent 4 }}
+  annotations:
+  {{- include "eric-oss-app-mgr.helm-annotations" .| nindent 4 }}
+data:
+  user-realm-role-mappings.json: |
+    [
+      {
+        "name": "AppMgrAdmin"
+      },
+      {
+        "name": "AppMgr_Application_Administrator"
+      }    
+    ]
